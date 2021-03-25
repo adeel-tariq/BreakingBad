@@ -42,6 +42,7 @@ public class BreakingBadCharacterActivity extends AppCompatActivity implements B
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setTheme(R.style.AppTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_breaking_bad_characters);
 
@@ -62,7 +63,7 @@ public class BreakingBadCharacterActivity extends AppCompatActivity implements B
     private void initViews() {
 
         mBinding.swipeRefresh.setOnRefreshListener(this);
-        int color = getResources().getColor(R.color.colorPrimary);
+        int color = getResources().getColor(R.color.colorAccentLight);
         mBinding.swipeRefresh.setColorSchemeColors(
                 color);
 

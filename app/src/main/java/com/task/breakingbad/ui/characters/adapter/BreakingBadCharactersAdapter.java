@@ -140,7 +140,7 @@ public class BreakingBadCharactersAdapter extends RecyclerView.Adapter<BaseViewH
                 CircularProgressDrawable circularProgressDrawable = new CircularProgressDrawable(mContext);
                 circularProgressDrawable.setStrokeWidth(10f);
                 circularProgressDrawable.setCenterRadius(80f);
-                int color = mContext.getResources().getColor(R.color.colorPrimary);
+                int color = mContext.getResources().getColor(R.color.colorAccentLight);
                 circularProgressDrawable.setColorSchemeColors(
                         color);
                 circularProgressDrawable.start();
