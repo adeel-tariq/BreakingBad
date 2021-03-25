@@ -1,11 +1,16 @@
 package com.task.breakingbad.network.repositories;
 
+import android.annotation.SuppressLint;
+
 import com.facebook.stetho.okhttp3.StethoInterceptor;
 import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
+import com.task.breakingbad.data.model.breakingBadCharacters.BreakingBadCharactersResponse;
+import com.task.breakingbad.network.NetworkInterface;
 import com.task.breakingbad.utils.Constants;
 
-import java.net.NetworkInterface;
+import java.util.List;
 
+import io.reactivex.Observable;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -38,6 +43,11 @@ public class NetworkRepository {
             mNetworkRepository = new NetworkRepository();
         }
         return mNetworkRepository;
+    }
+
+    @SuppressLint("CheckResult")
+    public Observable<List<BreakingBadCharactersResponse>> getCharacters(int limit, int offset) {
+        return mNetworkInterface.getCharacters(limit, offset);
     }
 
 }
