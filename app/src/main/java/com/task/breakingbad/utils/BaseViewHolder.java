@@ -4,6 +4,7 @@ import android.view.View;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+// base view holder for adapter
 public abstract class BaseViewHolder extends RecyclerView.ViewHolder {
 
     private int mCurrentPosition;

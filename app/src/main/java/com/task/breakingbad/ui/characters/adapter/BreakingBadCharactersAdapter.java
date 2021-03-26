@@ -9,6 +9,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.palette.graphics.Palette;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
+
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
@@ -28,37 +34,33 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.palette.graphics.Palette;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
-
 import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
 
+// adapter class for showing list of data in recyclerview
 public class BreakingBadCharactersAdapter extends RecyclerView.Adapter<BaseViewHolder> {
 
-    private CharactersItemClickListener mListener;
+    public static final int VIEW_TYPE_LOADING = 0; // loader should be shown for pagination
+    public static final int VIEW_TYPE_NORMAL = 1; // character should be shown in list
+    private boolean isLoaderVisible = false; // is the pagination loader visible
+    private List<BreakingBadCharactersResponse> mBreakingBadCharactersResponsesList = new ArrayList<>(); // storing all characters data
+    private Context mContext; // context for loading images using glide
 
-    public static final int VIEW_TYPE_LOADING = 0;
-    public static final int VIEW_TYPE_NORMAL = 1;
-    private boolean isLoaderVisible = false;
-    private List<BreakingBadCharactersResponse> mPostItems = new ArrayList<>();
-    private Context mContext;
-
-    public BreakingBadCharactersAdapter(Context context, List<BreakingBadCharactersResponse> dataItems, CharactersItemClickListener rentableProductsFragment) {
+    // constructor for adapter
+    public BreakingBadCharactersAdapter(Context context, List<BreakingBadCharactersResponse> dataItems) {
         mContext = context;
-        mListener = rentableProductsFragment;
-        this.mPostItems.addAll(dataItems);
+        this.mBreakingBadCharactersResponsesList.addAll(dataItems);
     }
 
+    // default adapter method to create view
     @NonNull
     @Override
     public BaseViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         switch (viewType) {
+            // should the normal character view cell be drawn/shown
             case VIEW_TYPE_NORMAL:
                 return new ViewHolder(
                         LayoutInflater.from(parent.getContext()).inflate(R.layout.item_characters_row_layout, parent, false));
+            // should the loader view cell be drawn/shown
             case VIEW_TYPE_LOADING:
                 return new ProgressHolder(
                         LayoutInflater.from(parent.getContext()).inflate(R.layout.item_loading_row_layout, parent, false));
@@ -67,59 +69,63 @@ public class BreakingBadCharactersAdapter extends RecyclerView.Adapter<BaseViewH
         }
     }
 
+    // bind the view with holder
     @Override
     public void onBindViewHolder(@NonNull BaseViewHolder holder, int position) {
         holder.onBind(position);
-
-        if (holder instanceof ViewHolder) {
-            ViewHolder viewHolder = (ViewHolder) holder;
-
-        }
     }
 
+    // get type of view either loader or character view cell
     @Override
     public int getItemViewType(int position) {
         if (isLoaderVisible) {
-            return position == mPostItems.size() - 1 ? VIEW_TYPE_LOADING : VIEW_TYPE_NORMAL;
+            return position == mBreakingBadCharactersResponsesList.size() - 1 ? VIEW_TYPE_LOADING : VIEW_TYPE_NORMAL;
         } else {
             return VIEW_TYPE_NORMAL;
         }
     }
 
+    // get total item count in adater list
     @Override
     public int getItemCount() {
-        return mPostItems == null ? 0 : mPostItems.size();
+        return mBreakingBadCharactersResponsesList == null ? 0 : mBreakingBadCharactersResponsesList.size();
     }
 
+    // add more items in list as result of api call
     public void addItems(List<BreakingBadCharactersResponse> postItems) {
-        mPostItems.addAll(postItems);
+        mBreakingBadCharactersResponsesList.addAll(postItems);
     }
 
+    // add loader as last item in list to indicate some data being loading
     public void addLoading() {
         isLoaderVisible = true;
-        mPostItems.add(new BreakingBadCharactersResponse());
-        notifyItemInserted(mPostItems.size() - 1);
+        mBreakingBadCharactersResponsesList.add(new BreakingBadCharactersResponse());
+        notifyItemInserted(mBreakingBadCharactersResponsesList.size() - 1);
     }
 
+    // remove last loader item from list to indicate api call done
     public void removeLoading() {
         isLoaderVisible = false;
-        int position = mPostItems.size() - 1;
+        int position = mBreakingBadCharactersResponsesList.size() - 1;
         BreakingBadCharactersResponse item = (BreakingBadCharactersResponse) getItem(position);
         if (item != null) {
-            mPostItems.remove(position);
+            mBreakingBadCharactersResponsesList.remove(position);
             notifyItemRemoved(position);
         }
     }
 
+    // clear all the items from adapter list in case of swipe down refresh
     public void clear() {
-        mPostItems.clear();
+        mBreakingBadCharactersResponsesList.clear();
         notifyDataSetChanged();
     }
 
-    Object getItem(int position) {
-        return mPostItems.get(position);
+    // get current item from list
+    BreakingBadCharactersResponse getItem(int position) {
+        return mBreakingBadCharactersResponsesList.get(position);
     }
 
+    // viewholder for character cell
     class ViewHolder extends BaseViewHolder {
 
         ItemCharactersRowLayoutBinding mBinding;
@@ -132,11 +138,13 @@ public class BreakingBadCharactersAdapter extends RecyclerView.Adapter<BaseViewH
         protected void clear() {
         }
 
+        // bind view items and set some data on the views
         public void onBind(int position) {
             super.onBind(position);
 
-            if (mPostItems.get(position) != null) {
+            if (mBreakingBadCharactersResponsesList.get(position) != null) {
 
+                // placeholder while image loads
                 CircularProgressDrawable circularProgressDrawable = new CircularProgressDrawable(mContext);
                 circularProgressDrawable.setStrokeWidth(10f);
                 circularProgressDrawable.setCenterRadius(80f);
@@ -145,19 +153,22 @@ public class BreakingBadCharactersAdapter extends RecyclerView.Adapter<BaseViewH
                         color);
                 circularProgressDrawable.start();
 
-                Glide.with(mContext).load(mPostItems.get(position).getImg())
-                        .placeholder(circularProgressDrawable)
-                        .transition(withCrossFade())
-                        .error(R.drawable.image_load_failed)
+                // loading image into imageView using glide
+                Glide.with(mContext).load(mBreakingBadCharactersResponsesList.get(position).getImg())
+                        .placeholder(circularProgressDrawable) // loader placeholder
+                        .transition(withCrossFade()) // animation when image loads
+                        .error(R.drawable.image_load_failed) // error image in case glide is unable to load image from url
                         .listener(new RequestListener<Drawable>() {
                                       @Override
                                       public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
                                           return false;
                                       }
 
+                                      // listener called when image is loaded into imageView by glide
                                       @Override
                                       public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
 
+                                          // extracting bitmap color using pallet library to make imageView background color based on dominant color in image to make better UI
                                           Bitmap bitmap = ((BitmapDrawable) resource).getBitmap();
 
                                           //Generate palette object from bitmap
@@ -170,14 +181,18 @@ public class BreakingBadCharactersAdapter extends RecyclerView.Adapter<BaseViewH
                                   }
                         ).into(mBinding.characterImage);
 
-                mBinding.characterName.setText(mPostItems.get(position).getName());
-                mBinding.characterAge.setText(mPostItems.get(position).getBirthday());
+                // set character name
+                mBinding.characterName.setText(mBreakingBadCharactersResponsesList.get(position).getName());
 
-                if (mPostItems.get(position).getBirthday() != null && !mPostItems.get(position).getBirthday().isEmpty() && !mPostItems.get(position).getBirthday().equalsIgnoreCase("unknown")) {
+                // checking if API returned character birthday or not
+                if (mBreakingBadCharactersResponsesList.get(position).getBirthday() != null && !mBreakingBadCharactersResponsesList.get(position).getBirthday().isEmpty() && !mBreakingBadCharactersResponsesList.get(position).getBirthday().equalsIgnoreCase("unknown")) {
+
+                    // if character birthday is given by API than calculating its age in years, months, days, hours, minutes seconds and showing it
+                    // calculation is done using joda time java library
 
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM-dd-yyyy hh:mm:ss aa");
                     try {
-                        Date birthDate = simpleDateFormat.parse(mPostItems.get(position).getBirthday() + " 05:30:00 AM");
+                        Date birthDate = simpleDateFormat.parse(mBreakingBadCharactersResponsesList.get(position).getBirthday() + " 05:30:00 AM");
                         Date currentDate = Calendar.getInstance().getTime();
                         if (birthDate != null) {
                             mBinding.characterAge.setText(printDifference(birthDate, currentDate));
@@ -189,13 +204,15 @@ public class BreakingBadCharactersAdapter extends RecyclerView.Adapter<BaseViewH
                         e.printStackTrace();
                     }
                 } else {
-                    mBinding.characterAge.setText("Birthday is " + mPostItems.get(position).getBirthday());
+                    // if no data given by api than default message is shown
+                    mBinding.characterAge.setText("Birthday is " + mBreakingBadCharactersResponsesList.get(position).getBirthday());
                 }
 
             }
         }
     }
 
+    // calculating difference in 2 dates using java joda time library and returning a string to show in view text
     public String printDifference(Date startDate, Date endDate) {
 
         Interval interval =
@@ -205,6 +222,7 @@ public class BreakingBadCharactersAdapter extends RecyclerView.Adapter<BaseViewH
 
     }
 
+    // view holder for progress bar
     public class ProgressHolder extends BaseViewHolder {
         ProgressHolder(View itemView) {
             super(itemView);
@@ -213,9 +231,5 @@ public class BreakingBadCharactersAdapter extends RecyclerView.Adapter<BaseViewH
         @Override
         protected void clear() {
         }
-    }
-
-    public interface CharactersItemClickListener {
-        void onProductClick(View view, String productUuId);
     }
 }

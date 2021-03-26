@@ -25,11 +25,11 @@ public class NetworkRepository {
     private NetworkRepository() {
 
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
-        builder.addNetworkInterceptor(new StethoInterceptor());
+        builder.addNetworkInterceptor(new StethoInterceptor()); // debug interceptor to debug API calls using facebok stetho library in conjunction with chrome browser
         OkHttpClient okHttpClient = builder.build();
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(Constants.BASE_URL)
+                .baseUrl(Constants.BASE_URL) // base url of our APU
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create())
                 .client(okHttpClient)
@@ -38,6 +38,7 @@ public class NetworkRepository {
         mNetworkInterface = retrofit.create(NetworkInterface.class);
     }
 
+    // getting instance of retrofit client which will be used in making API call
     public synchronized static NetworkRepository getInstance() {
         if (mNetworkRepository == null) {
             mNetworkRepository = new NetworkRepository();
@@ -45,6 +46,7 @@ public class NetworkRepository {
         return mNetworkRepository;
     }
 
+    // Observable for calling and observing on the response from API
     @SuppressLint("CheckResult")
     public Observable<List<BreakingBadCharactersResponse>> getCharacters(int limit, int offset) {
         return mNetworkInterface.getCharacters(limit, offset);

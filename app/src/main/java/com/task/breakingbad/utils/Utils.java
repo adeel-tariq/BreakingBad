@@ -1,12 +1,9 @@
 package com.task.breakingbad.utils;
 
-import android.app.Activity;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
-import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 
 import com.jakewharton.retrofit2.adapter.rxjava2.HttpException;
 
@@ -17,11 +14,11 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.util.Objects;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import es.dmoral.toasty.Toasty;
 
+// utility class for doing some across the applications tasks (personally created)
 public class Utils {
 
     private static final Pattern VALID_EMAIL_ADDRESS_REGEX =
@@ -44,25 +41,26 @@ public class Utils {
      */
     public static String errorType(Throwable error) {
 
-        if (error instanceof SocketTimeoutException) {
+        if (error instanceof SocketTimeoutException) { // if api error was timeout
             return "Problem connecting to server. Please check your internet connection and try again.";
 
-        } else if (error instanceof IOException) {
+        } else if (error instanceof IOException) { // if api error was IOException
             return "Problem connecting to server. Please check your internet connection and try again.";
 
-        } else if (error instanceof JSONException) {
+        } else if (error instanceof JSONException) { // if api error was json exception
             return "Server error. Please try again later.";
 
-        } else if (error instanceof HttpException) {
+        } else if (error instanceof HttpException) { // if api error was http exception
             Log.i("info", "HttpException");
 
             String responseBody = null;
             try {
                 responseBody = Objects.requireNonNull(((HttpException) error).response().errorBody()).string();
-                Log.i("info", "responseBody: " + responseBody + " statusCode " + ((HttpException) error).code());
             } catch (IOException e1) {
                 e1.printStackTrace();
             }
+
+            // based on different status code error message is extracted out from response this needs to be changed depending upon different ways different api pass error response data
             int statusCode = ((HttpException) error).code();
             if (statusCode >= 400 && statusCode < 500) {
                 if (statusCode == 400 || statusCode == 403) {
@@ -124,20 +122,12 @@ public class Utils {
     }
 
     /**
-     * retrieve messages from reponse body
+     * retrieve messages from response body
      *
      * @param responseBody json response body received by server
      * @return string message/s present in json
      */
     private static String getErrors(String responseBody) {
-//        try {
-//            JSONObject jsonObject = new JSONObject(responseBody);
-//            return jsonObject.getString("message");
-//        } catch (JSONException e) {
-//            e.printStackTrace();
-//            return "";
-//        }
-
         try {
             StringBuilder errors = new StringBuilder();
             JSONObject jsonObject = new JSONObject(responseBody);
@@ -170,48 +160,7 @@ public class Utils {
     }
 
     /**
-     * Validate email boolean.
-     *
-     * @param emailStr the email str
-     * @return the boolean
-     */
-    public static boolean validateEmail(CharSequence emailStr) {
-        Matcher matcher = VALID_EMAIL_ADDRESS_REGEX.matcher(emailStr);
-
-        String x = "";
-        if (x.matches("^([+]\\d{2}[ ])?\\d{10}$")) {
-            System.out.println("OK");
-        }
-
-
-        return matcher.find();
-    }
-
-    /**
-     * Validate password boolean.
-     *
-     * @param passwordStr the password str
-     * @return the boolean
-     */
-    public static boolean validatePassword(CharSequence passwordStr) {
-        Matcher matcher = VALID_PASSWORD_REGEX.matcher(passwordStr);
-        return matcher.find();
-    }
-
-    /**
-     * Validate password boolean.
-     *
-     * @param number the phone str
-     * @return the boolean
-     */
-    public static boolean validatePhone(CharSequence number) {
-        Matcher matcher = VALID_NUMBER_92.matcher(number);
-        Matcher matcher1 = VALID_NUMBER_03.matcher(number);
-        return matcher.find() || matcher1.find();
-    }
-
-    /**
-     * noConnectionDialog.
+     * check if internet connection is present or not and show a toast if not
      *
      * @param context the context
      */
@@ -249,21 +198,5 @@ public class Utils {
             Toasty.warning(context, message, Toasty.LENGTH_SHORT, true).show();
         else if (type == 4)
             Toasty.error(context, message, Toasty.LENGTH_SHORT, true).show();
-    }
-
-    public static void hideKeyboard(Activity activity) {
-        try {
-            InputMethodManager imm = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
-            //Find the currently focused view, so we can grab the correct window token from it.
-            View view = activity.getCurrentFocus();
-            //If no view currently has focus, create a new one, just so we can grab a window token from it
-            if (view == null) {
-                view = new View(activity);
-            }
-            if (imm != null)
-                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 }

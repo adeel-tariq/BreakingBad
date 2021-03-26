@@ -5,6 +5,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
+// model class for BreakingBadCharactersResponse from API
 public class BreakingBadCharactersResponse {
 
 	@SerializedName("char_id")
@@ -129,6 +130,7 @@ public class BreakingBadCharactersResponse {
 		this.betterCallSaulAppearance = betterCallSaulAppearance;
 	}
 
+	// toString method to print the whole response which is parsed to this class
 	@Override
 	public String toString(){
 		return
